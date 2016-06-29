@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE RelativeLayout>
+<project name="Nike Code Sample" default="build" basedir=".">
+
+	<!-- sets the classpath -->
+	<target name="set-classpath">
+		<path id="classpath.path">
+			<pathelement path="bin" />
+			<fileset dir="lib" />
+		</path>
+	</target>
+
+	<!-- compiles the code -->
+	<target name="compile" depends="set-classpath">
+		<mkdir dir="bin" />
+		<javac srcdir="src" destdir="bin" includeAntRuntime="false">
+			<classpath refid="classpath.path" />
+			<exclude name="**/package-info.java" />
+		</javac>
+	</target>
+
+	<!-- creates a jar file to run the service -->
+	<target name="jar" depends="compile">
+		<manifestclasspath property="jar.classpath" jarfile="DeckREST.jar">
+			<classpath refid="classpath.path" />
+		</manifestclasspath>
+		<jar jarfile="DeckREST.jar" basedir="bin">
+			<manifest>
+				<attribute name="Main-Class" value="main.DeckREST" />
+				<attribute name="Class-Path" value=". ${jar.classpath}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<!-- creates the java documentation -->
+	<target name="javadoc" depends="set-classpath">
+		<mkdir dir="javadoc" />
+		<javadoc sourcepath="src" destdir="javadoc" doctitle="Nike Code Sample">
+			<classpath refid="classpath.path" />
+		</javadoc>
+	</target>
+
+	<!-- builds the project -->
+	<target name="build" depends="jar,javadoc" />
+
+	<!-- runs the service -->
+	<target name="run" depends="compile">
+		<condition property="configurationFile" value="properties/configuration.properties">
+		    <not>  
+		        <isset property="configurationFile"/>
+		    </not>
+		</condition>
+		<java classname="main.DeckREST" fork="true" spawn="true">
+			<classpath refid="classpath.path" />
+			<jvmarg value="-DconfigurationFile=${configurationFile}"/>
+		</java>
+	</target>
+
+	<!-- cleans up the generated files -->
+	<target name="clean">
+		<delete dir="bin" />
+		<delete dir="javadoc" />
+		<delete file="DeckREST.jar" />
+	</target>
+
+</project>
